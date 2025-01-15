@@ -6,13 +6,27 @@ import * as OBF from "@thatopen/components-front";
 export class WallMeasurement extends OBC.Component {
   static uuid = "a5fc1ead-d314-4171-8927-13ab3926b7db" as const;
   enabled = true;
+  // Create a new private property named _objects. Make it an array of FragmentMesh, and initialize it empty.
+  private _objects: FRAGS.FragmentMesh[] = [];
 
   constructor(components: OBC.Components) {
     super(components);
     components.add(WallMeasurement.uuid, this);
+
+    // Get an instance of the LengthMeasurement component
+    const lengthMeasurementComponent = components.get(OBF.LengthMeasurement);
+
+    // Add a new callback to the onCleaned event
+    lengthMeasurementComponent.onCleaned.remove(() => {
+      // Set the _objects property to an empty array when onCleaned is triggered
+      this._objects = [];
+    });
   }
 
   measure(object: FRAGS.FragmentMesh, faceIndex: number, instanceId: number) {
+    // If the _objects property includes the object passed in the arguments. If it does, return the function.
+    if (this._objects.includes(object)) return;
+    console.log("triggered");
     // The measuring will start by getting the face data of the element
     // where we want to perform the action.
     // The data will come really easily from a raycast.
@@ -95,5 +109,7 @@ export class WallMeasurement extends OBC.Component {
       // and the next one.
       lengthMeasurement.createOnPoints(projection, nextPoint);
     }
+    // Add the object passed in the arguments to the _objects property in the component.
+    this._objects.push(object);
   }
 }
